@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ziting L1 · Public Demo Dashboard</title>
+  <meta name="description" content="Ziting institutional demo / research lab — read-only multi-agent court stub. Not a sovereign state claim." />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f5f7;
+      --card: #ffffff;
+      --ink: #1a1d23;
+      --muted: #5c6570;
+      --line: #d8dce3;
+      --accent: #3d4f6f;
+      --ok: #1f6b3a;
+      --warn: #8a5a00;
+      --bad: #8b2e2e;
+      --draft: #5c6570;
+      --kpi: #eef1f6;
+      --banner-bg: #1a2744;
+      --banner-ink: #f8f4ec;
+      --banner-accent: #c9a227;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12151a;
+        --card: #1b2028;
+        --ink: #e8ecf1;
+        --muted: #9aa3ad;
+        --line: #2c3440;
+        --accent: #8fa3c7;
+        --ok: #6bc48a;
+        --warn: #e0b15a;
+        --bad: #e08a8a;
+        --draft: #9aa3ad;
+        --kpi: #242b35;
+        --banner-bg: #0e1420;
+        --banner-ink: #f0ebe0;
+        --banner-accent: #d4b84a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .disclaimer-banner {
+      background: var(--banner-bg);
+      color: var(--banner-ink);
+      border-bottom: 3px solid var(--banner-accent);
+      padding: 0.85rem 1.5rem;
+      text-align: center;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .disclaimer-banner strong {
+      color: var(--banner-accent);
+      font-weight: 700;
+    }
+    header.brand-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1.5rem;
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      box-shadow: inset 0 -2px 0 #c9a227, inset 0 -3px 0 #1a2744;
+    }
+    header.brand-bar .flag {
+      flex: 0 0 auto;
+      height: 44px;
+      width: auto;
+      display: block;
+      border: 1px solid #c9a227;
+      border-radius: 2px;
+      object-fit: contain;
+    }
+    header.brand-bar .titles {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    header.brand-bar h1 {
+      margin: 0 0 0.2rem;
+      font-size: 1.2rem;
+      font-weight: 650;
+      letter-spacing: 0.01em;
+    }
+    header.brand-bar .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+    header.brand-bar .seal {
+      flex: 0 0 auto;
+      height: 52px;
+      width: 52px;
+      display: block;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #c9a227;
+      background: #f8f4ec;
+    }
+    @media (max-width: 560px) {
+      header.brand-bar { flex-wrap: wrap; }
+      header.brand-bar .seal { margin-left: auto; }
+    }
+    main { padding: 1.25rem 1.5rem 2.5rem; max-width: 1100px; margin: 0 auto; }
+    .meta {
+      display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem;
+      margin-bottom: 1.25rem; color: var(--muted); font-size: 0.8rem;
+    }
+    .meta code { font-size: 0.78rem; }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .kpi {
+      background: var(--kpi);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+    }
+    .kpi .label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .kpi .value { font-size: 1.5rem; font-weight: 700; margin-top: 0.2rem; color: var(--accent); }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    section h2 {
+      margin: 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--kpi);
+    }
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      white-space: nowrap;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    tr:last-child td { border-bottom: none; }
+    .badge {
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: var(--bg);
+    }
+    .badge.active, .badge.paid, .badge.published { color: var(--ok); }
+    .badge.due, .badge.pending { color: var(--warn); }
+    .badge.suspended { color: var(--bad); }
+    .badge.waived, .badge.draft { color: var(--draft); }
+    .tags { color: var(--muted); font-size: 0.75rem; }
+    .note { color: var(--muted); max-width: 28rem; }
+    .schema-note {
+      margin: 0 0 1rem;
+      padding: 0.65rem 0.85rem;
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      background: var(--kpi);
+    }
+    footer {
+      margin-top: 0.5rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-align: center;
+    }
+    @media print {
+      body { background: #fff; color: #000; }
+      header, section, .kpi { break-inside: avoid; box-shadow: none; }
+      .kpi, section, header { border-color: #ccc; background: #fff; }
+      header.brand-bar { box-shadow: inset 0 -2px 0 #c9a227, inset 0 -3px 0 #1a2744; }
+      .disclaimer-banner { color: #000; background: #eee; border-color: #c9a227; }
+    }
+  </style>
+</head>
+<body>
+  <div class="disclaimer-banner" role="note">
+    <strong>Demo / institutional R&amp;D · research lab</strong>
+    — demo / not a sovereign claim · not a recognized state · no dues checkout.
+    No payments, donation forms, or payment links on this page.
+  </div>
+  <header class="brand-bar">
+    <img class="flag" src="assets/flag-v2-dome-en.jpg" width="66" height="44" alt="Court flag · dome motif textless (demo sketch)" />
+    <div class="titles">
+      <h1>DEMO-01 · Ziting L1 · Public Demo Dashboard</h1>
+      <p class="sub">Institutional demo / research lab · read-only static stub · multi-agent court metaphor</p>
+      <p class="sub">English-primary public skeleton · pending go-live under Decree 2026-008 · no live treasury</p>
+    </div>
+    <img class="seal" src="assets/seal-v22-wax-basileia.jpg" width="52" height="52" alt="Court seal · wax BASILEIA motif (demo sketch)" />
+  </header>
+  <main>
+    <p class="schema-note">
+      Sample rows illustrate registry / dues-schema / decree-index shapes only.
+      Figures are fictional. This page never collects money and never links to Stripe, PayPal, or checkout.
+    </p>
+    <div class="meta" id="meta">
+      <span>Data source: <code id="source-label">loading…</code></span>
+      <span id="updated-label"></span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+
+    <section>
+      <h2>Citizens (sample registry)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Legal name</th>
+              <th>Display</th>
+              <th>Status</th>
+              <th>Enrolled</th>
+              <th>Tags</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="citizens-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Dues ledger (schema demo — not billable)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ledger ID</th>
+              <th>Citizen</th>
+              <th>Period</th>
+              <th>Amount</th>
+              <th>Due</th>
+              <th>Paid</th>
+              <th>Status</th>
+              <th>Memo</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Decree index (sample)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Seq</th>
+              <th>Title</th>
+              <th>Issued</th>
+              <th>Status</th>
+              <th>Path</th>
+              <th>Tags</th>
+            </tr>
+          </thead>
+          <tbody id="decrees-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      Ziting L1 public demo · printable · read-only · institutional demo / research lab · not a sovereign claim
+    </footer>
+  </main>
+
+  <script>
+    /* Public-safe embedded samples only. No fetch of internal registry paths. */
+    const EMBEDDED_REGISTRY = {
+      "version": "0.1.0-public",
+      "updated_at": "2026-10-20T19:33:00+08:00",
+      "citizens": [
+        {
+          "citizen_id": "ZT-C-0001",
+          "legal_name": "Patron / constitutional veto (identity withheld on public demo)",
+          "display_name": "Patron",
+          "status": "active",
+          "enrolled_at": "2026-10-20",
+          "notes": "Constitutional veto seat; personal identity withheld on this public demo.",
+          "tags": ["patron", "constitutional-veto"]
+        },
+        {
+          "citizen_id": "ZT-C-0002",
+          "legal_name": "Sakellarios Placeholder",
+          "display_name": "Treasury stub",
+          "status": "pending",
+          "enrolled_at": "2026-10-20",
+          "notes": "Role stub for future treasury logic (Sakellarios).",
+          "tags": ["treasury", "role-stub"]
+        },
+        {
+          "citizen_id": "ZT-C-0003",
+          "legal_name": "Logothete Placeholder",
+          "display_name": "Scribe stub",
+          "status": "active",
+          "enrolled_at": "2026-10-20",
+          "notes": "Role stub for decree archive maintenance.",
+          "tags": ["decrees", "role-stub"]
+        },
+        {
+          "citizen_id": "ZT-C-0004",
+          "legal_name": "Demo Citizen Alpha",
+          "display_name": "Demo A",
+          "status": "active",
+          "enrolled_at": "2026-10-20",
+          "notes": "Sample dues row: paid (fictional).",
+          "tags": ["demo", "dues-paid"]
+        },
+        {
+          "citizen_id": "ZT-C-0005",
+          "legal_name": "Demo Citizen Beta",
+          "display_name": "Demo B",
+          "status": "suspended",
+          "enrolled_at": "2026-10-20",
+          "notes": "Sample dues row: overdue; suspended status is illustrative only.",
+          "tags": ["demo", "dues-due"]
+        }
+      ]
+    };
+
+    const EMBEDDED_TREASURY = {
+      "version": "0.1.0-public",
+      "updated_at": "2026-10-20T19:33:00+08:00",
+      "currency_default": "DEMO",
+      "entries": [
+        {
+          "ledger_id": "ZT-L-2026-10-0001",
+          "citizen_id": "ZT-C-0001",
+          "period": "2026-10",
+          "amount": 0,
+          "currency": "DEMO",
+          "due_at": "2026-10-31",
+          "paid_at": "2026-10-20",
+          "status": "waived",
+          "memo": "Patron waiver (schema demo); not a real account."
+        },
+        {
+          "ledger_id": "ZT-L-2026-10-0002",
+          "citizen_id": "ZT-C-0002",
+          "period": "2026-10",
+          "amount": 0,
+          "currency": "DEMO",
+          "due_at": "2026-10-31",
+          "paid_at": null,
+          "status": "draft",
+          "memo": "Role stub not enrolled; draft, not collectible."
+        },
+        {
+          "ledger_id": "ZT-L-2026-10-0003",
+          "citizen_id": "ZT-C-0003",
+          "period": "2026-10",
+          "amount": 0,
+          "currency": "DEMO",
+          "due_at": "2026-10-31",
+          "paid_at": null,
+          "status": "draft",
+          "memo": "Role stub; amount pending tier docs."
+        },
+        {
+          "ledger_id": "ZT-L-2026-10-0004",
+          "citizen_id": "ZT-C-0004",
+          "period": "2026-10",
+          "amount": 88,
+          "currency": "DEMO",
+          "due_at": "2026-10-31",
+          "paid_at": "2026-10-18",
+          "status": "paid",
+          "memo": "Demo A · fictional paid sample."
+        },
+        {
+          "ledger_id": "ZT-L-2026-10-0005",
+          "citizen_id": "ZT-C-0005",
+          "period": "2026-10",
+          "amount": 88,
+          "currency": "DEMO",
+          "due_at": "2026-10-15",
+          "paid_at": null,
+          "status": "due",
+          "memo": "Demo B · fictional overdue sample."
+        }
+      ]
+    };
+
+    const EMBEDDED_DECREES = {
+      "version": "0.1.0-public",
+      "updated_at": "2026-10-20T19:33:00+08:00",
+      "decrees": [
+        {
+          "decree_id": "L1-001",
+          "seq": 1,
+          "title": "Founding Build Order",
+          "issued_at": "2026-10-20",
+          "status": "published",
+          "path": "samples/2026-10-20-L1-001-founding.md",
+          "tags": ["founding", "l1-mvp", "admin"]
+        }
+      ]
+    };
+
+    function esc(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function badge(status) {
+      return '<span class="badge ' + esc(status) + '">' + esc(status) + "</span>";
+    }
+
+    function countBy(arr, key, value) {
+      return arr.filter(function (x) { return x[key] === value; }).length;
+    }
+
+    function render(registry, treasury, decrees, sourceLabel) {
+      var citizens = registry.citizens || [];
+      var entries = treasury.entries || [];
+      var decreeList = decrees.decrees || [];
+
+      document.getElementById("source-label").textContent = sourceLabel;
+      var stamps = [registry.updated_at, treasury.updated_at, decrees.updated_at].filter(Boolean);
+      document.getElementById("updated-label").textContent =
+        stamps.length ? "Sample updated_at: " + stamps[0] + " (Asia/Shanghai)" : "";
+
+      var paid = countBy(entries, "status", "paid");
+      var due = countBy(entries, "status", "due");
+      var waived = countBy(entries, "status", "waived");
+
+      document.getElementById("kpis").innerHTML = [
+        { label: "Citizens", value: citizens.length },
+        { label: "Dues paid (demo)", value: paid },
+        { label: "Dues due (demo)", value: due },
+        { label: "Dues waived (demo)", value: waived },
+        { label: "Decrees", value: decreeList.length }
+      ].map(function (k) {
+        return '<div class="kpi"><div class="label">' + esc(k.label) +
+          '</div><div class="value">' + esc(k.value) + "</div></div>";
+      }).join("");
+
+      document.getElementById("citizens-body").innerHTML = citizens.map(function (c) {
+        return "<tr>" +
+          "<td><code>" + esc(c.citizen_id) + "</code></td>" +
+          "<td>" + esc(c.legal_name) + "</td>" +
+          "<td>" + esc(c.display_name) + "</td>" +
+          "<td>" + badge(c.status) + "</td>" +
+          "<td>" + esc(c.enrolled_at) + "</td>" +
+          '<td class="tags">' + esc((c.tags || []).join(", ")) + "</td>" +
+          '<td class="note">' + esc(c.notes) + "</td>" +
+          "</tr>";
+      }).join("") || '<tr><td colspan="7">No citizens</td></tr>';
+
+      document.getElementById("ledger-body").innerHTML = entries.map(function (e) {
+        var amt = (e.amount == null ? "" : e.amount) + " " + (e.currency || "");
+        return "<tr>" +
+          "<td><code>" + esc(e.ledger_id) + "</code></td>" +
+          "<td><code>" + esc(e.citizen_id) + "</code></td>" +
+          "<td>" + esc(e.period) + "</td>" +
+          "<td>" + esc(amt.trim()) + "</td>" +
+          "<td>" + esc(e.due_at) + "</td>" +
+          "<td>" + esc(e.paid_at || "—") + "</td>" +
+          "<td>" + badge(e.status) + "</td>" +
+          '<td class="note">' + esc(e.memo) + "</td>" +
+          "</tr>";
+      }).join("") || '<tr><td colspan="8">No ledger rows</td></tr>';
+
+      document.getElementById("decrees-body").innerHTML = decreeList.map(function (d) {
+        return "<tr>" +
+          "<td><code>" + esc(d.decree_id) + "</code></td>" +
+          "<td>" + esc(d.seq) + "</td>" +
+          "<td>" + esc(d.title) + "</td>" +
+          "<td>" + esc(d.issued_at) + "</td>" +
+          "<td>" + badge(d.status) + "</td>" +
+          "<td><code>" + esc(d.path) + "</code></td>" +
+          '<td class="tags">' + esc((d.tags || []).join(", ")) + "</td>" +
+          "</tr>";
+      }).join("") || '<tr><td colspan="7">No decrees</td></tr>';
+    }
+
+    function boot() {
+      render(
+        EMBEDDED_REGISTRY,
+        EMBEDDED_TREASURY,
+        EMBEDDED_DECREES,
+        "embedded public-safe samples (no internal fetch)"
+      );
+    }
+
+    boot();
+  </script>
+</body>
+</html>
